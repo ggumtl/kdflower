@@ -6,27 +6,16 @@
     <title>강동화훼 Gallery</title>
     <style>
         :root {
-            --bg-color: #ffffff;
-            --primary-color: #111111;
-            --accent-color: #007aff;
-            --text-muted: #666666;
-            --border-color: #eeeeee;
+            --primary-color: #007bff;
+            --bg-color: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-color: #333333;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); padding: 15px; color: var(--text-color); padding-bottom: 40px; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--primary-color);
-            padding-bottom: 30px;
-        }
-
-        /* 1. 최상단 타이틀 (고정) */
+        /* 상단 헤더 */
         header {
             background-color: #ffffff;
             padding: 14px 12px 10px;
@@ -34,21 +23,14 @@
             border-bottom: 1px solid var(--border-color);
             position: sticky;
             top: 0;
-            z-index: 30; /* 최상위 레이어 */
+            z-index: 30;
+            margin: -15px -15px 15px -15px;
         }
 
-        header h1 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 2px;
-        }
+        header h1 { font-size: 1.2rem; font-weight: 700; margin-bottom: 2px; }
+        header p { font-size: 0.75rem; color: #666; }
 
-        header p {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        /* 2. 상단 카테고리 네비게이션 (타이틀 바로 밑에 고정) */
+        /* 상단 카테고리 네비게이션 (가로 스크롤) */
         nav.category-bar {
             background-color: #ffffff;
             padding: 8px 10px;
@@ -58,119 +40,78 @@
             white-space: nowrap;
             border-bottom: 1px solid var(--border-color);
             position: sticky;
-            top: 57px; /* header 높이에 맞춰 고정 위치 지정 */
+            top: 53px;
             z-index: 20;
+            margin: -15px -15px 15px -15px;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03); /* 약간의 그림자 추가 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
         }
 
-        nav.category-bar::-webkit-scrollbar {
-            display: none;
-        }
+        nav.category-bar::-webkit-scrollbar { display: none; }
 
         nav.category-bar button {
             background-color: #f2f2f7;
-            color: var(--primary-color);
-            border: none;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
             padding: 6px 12px;
-            border-radius: 16px;
+            border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
         }
 
         nav.category-bar button:active {
-            background-color: var(--accent-color);
+            background-color: var(--primary-color);
             color: #ffffff;
         }
 
-        .container {
-            width: 100%;
-            margin: 0 auto;
+        /* 카테고리 섹션 및 타이틀 (gallery_view 스타일) */
+        .category-section { margin-bottom: 25px; scroll-margin-top: 110px; }
+        .category-title { 
+            font-size: 1.05rem; 
+            font-weight: bold; 
+            padding: 8px 10px; 
+            background-color: #e9ecef; 
+            border-left: 4px solid var(--primary-color); 
+            margin-bottom: 10px; 
+            border-radius: 0 4px 4px 0; 
         }
 
-        /* 스크롤 시 카테고리 헤더에 제목이 가려지지 않도록 여백 조정 */
-        .category-section {
-            scroll-margin-top: 105px;
-        }
+        /* 모바일 3열, PC 6~10열 그리드 */
+        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        @media (min-width: 768px) { .gallery-grid { grid-template-columns: repeat(6, 1fr); gap: 10px; } }
+        @media (min-width: 1200px) { .gallery-grid { grid-template-columns: repeat(10, 1fr); gap: 10px; } }
 
-        .category-title {
-            font-size: 1.05rem;
-            font-weight: 700;
-            padding: 12px 10px 8px;
-            background-color: #fafafa;
-            border-bottom: 1px solid var(--border-color);
-            border-top: 1px solid var(--border-color);
-        }
-
-        /* 3열 간격 없는 그리드 */
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0;
-        }
-
-        @media (min-width: 768px) {
-            .gallery-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        .flower-card {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            overflow: hidden;
-            background-color: #e5e5ea;
+        /* 갤러리 카드 디자인 */
+        .flower-card { 
+            background: white; 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
             cursor: pointer;
         }
 
-        .flower-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
+        .img-wrapper { 
+            position: relative; 
+            width: 100%; 
+            aspect-ratio: 1 / 1; 
+            background-color: #eee; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
         }
 
-        .no-image {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #8e8e93;
-            font-size: 0.75rem;
-            background-color: #f2f2f7;
-            text-align: center;
-            padding: 4px;
-        }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .no-img { font-size: 0.75rem; color: #888; text-align: center; }
 
-        .flower-name-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 4px 2px;
-            background: rgba(0, 0, 0, 0.55);
-            color: #ffffff;
-            font-size: 0.75rem;
-            font-weight: 500;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            box-sizing: border-box;
-        }
+        .card-info { padding: 5px 4px; text-align: center; background-color: white; border-top: 1px solid #f1f3f5; }
+        .flower-name { font-size: 0.75rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 
-        .empty-section {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 24px 0;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            background-color: #ffffff;
-        }
+        .empty-text { color: #adb5bd; font-size: 0.8rem; padding: 10px; }
 
         /* 맨 위로 가기 Floating 버튼 */
         #scrollTopBtn {
@@ -193,7 +134,7 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
-        /* 모바일 전체화면 이미지 모달(팝업) */
+        /* 전체화면 이미지 모달 */
         .image-modal {
             display: none;
             position: fixed;
@@ -217,19 +158,8 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
-        .modal-caption {
-            margin-top: 16px;
-            color: #ffffff;
-            font-size: 1.05rem;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .modal-close-hint {
-            margin-top: 8px;
-            color: #aaaaaa;
-            font-size: 0.75rem;
-        }
+        .modal-caption { margin-top: 16px; color: #ffffff; font-size: 1.05rem; font-weight: 600; text-align: center; }
+        .modal-close-hint { margin-top: 8px; color: #aaaaaa; font-size: 0.75rem; }
     </style>
 </head>
 <body>
@@ -250,28 +180,28 @@
     <div class="container">
         {% for category in categories %}
         <section id="cat-{{ category.idx }}" class="category-section">
-            <div class="category-title">
-                {{ category.name }}
-            </div>
+            <div class="category-title">{{ category.name }}</div>
 
             <div class="gallery-grid">
                 {% set visible_flowers = category.flowers | selectattr("view", "equalto", 1) | list %}
                 {% if visible_flowers %}
                     {% for flower in visible_flowers %}
                     <div class="flower-card" onclick="openImageViewer('/{{ flower.img_path }}', '{{ flower.name }}')">
-                        {% if flower.img_path %}
-                        <img src="/{{ flower.img_path }}" alt="{{ flower.name }}" loading="lazy">
-                        {% else %}
-                        <div class="no-image">준비중 입니다</div>
-                        {% endif %}
+                        <div class="img-wrapper">
+                            {% if flower.img_path %}
+                            <img src="/{{ flower.img_path }}" alt="{{ flower.name }}" loading="lazy">
+                            {% else %}
+                            <div class="no-img">준비중</div>
+                            {% endif %}
+                        </div>
                         
-                        <div class="flower-name-overlay">{{ flower.name }}</div>
+                        <div class="card-info">
+                            <span class="flower-name" title="{{ flower.name }}">{{ flower.name }}</span>
+                        </div>
                     </div>
                     {% endfor %}
                 {% else %}
-                    <div class="empty-section">
-                        등록된 상품이 없습니다.
-                    </div>
+                    <div class="empty-text">등록된 상품이 없습니다.</div>
                 {% endif %}
             </div>
         </section>
@@ -281,7 +211,7 @@
     <!-- 맨 위로 가기 버튼 -->
     <button id="scrollTopBtn" onclick="scrollToTop()" title="맨 위로 이동">▲</button>
 
-    <!-- 전체화면 이미지 팝업 모달 -->
+    <!-- 전체화면 이미지 모달 -->
     <div id="imageModal" class="image-modal" onclick="closeImageViewer()">
         <img id="modalImg" class="modal-img" src="" alt="">
         <div id="modalCaption" class="modal-caption"></div>
@@ -296,7 +226,6 @@
             }
         }
 
-        // 맨 위로 가기 버튼
         const scrollTopBtn = document.getElementById("scrollTopBtn");
         window.onscroll = function () {
             if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
@@ -310,7 +239,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // 전체화면 이미지 팝업 열기 / 닫기
         function openImageViewer(imgPath, name) {
             if (!imgPath || imgPath === '/None') return;
             
