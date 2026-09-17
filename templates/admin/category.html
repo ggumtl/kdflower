@@ -2,61 +2,70 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>카테고리 관리</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카테고리 관리 - 강동화훼</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        nav { margin-bottom: 20px; }
-        nav a { margin-right: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
-        table { border-collapse: collapse; width: 100%; max-width: 650px; margin-top: 15px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; vertical-align: middle; }
-        th { background-color: #f2f2f2; }
-        .input-num { width: 60px; text-align: center; }
-        .btn-sm { padding: 4px 8px; background-color: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        :root {
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --bg-color: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); padding: 15px; color: #333; }
+
+        nav { display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; padding-bottom: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        nav a { text-decoration: none; color: var(--primary-color); font-weight: bold; padding: 6px 12px; background: white; border-radius: 20px; border: 1px solid var(--border-color); font-size: 0.85rem; }
+
+        h2 { font-size: 1.15rem; margin-bottom: 12px; font-weight: 700; }
+
+        .add-card { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px; }
+        .add-card form { display: flex; flex-direction: column; gap: 8px; }
+        .add-card input { padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.9rem; }
+
+        .btn-add { padding: 10px; background-color: var(--primary-color); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
+        .category-list { display: flex; flex-direction: column; gap: 8px; }
+        .category-item { background: white; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; }
+        
+        .input-order { width: 60px; text-align: center; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.85rem; }
+        .input-name { flex: 1; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.85rem; min-width: 0; }
+        
+        .btn-save { padding: 6px 12px; background-color: var(--success-color); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
     </style>
 </head>
 <body>
+
     <nav>
-        <a href="/admin/category">카테고리 관리</a> | 
-        <a href="/admin/flower">꽃 목록 관리</a> | 
-        <a href="/admin/gallery-view">갤러리 뷰</a> | 
+        <a href="/admin/category">카테고리 관리</a>
+        <a href="/admin/flower">꽃 목록 관리</a>
+        <a href="/admin/gallery-view">갤러리 뷰</a>
         <a href="/admin/logout">로그아웃</a>
     </nav>
 
     <h2>카테고리 등록 및 순서 관리</h2>
     
-    <form action="/admin/category" method="post" style="margin-bottom: 20px;">
-        <input type="text" name="name" placeholder="카테고리명" required>
-        <input type="number" name="order_no" placeholder="순서 (작을수록 우선)" value="0" class="input-num">
-        <button type="submit">카테고리 추가</button>
-    </form>
+    <div class="add-card">
+        <form action="/admin/category" method="post">
+            <input type="text" name="name" placeholder="카테고리명 입력" required>
+            <input type="number" name="order_no" placeholder="순서 (작을수록 상단)" value="0">
+            <button type="submit" class="btn-add">카테고리 추가</button>
+        </form>
+    </div>
 
-    <h3>등록된 카테고리 목록</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>정렬 순서(Order)</th>
-                <th>카테고리명</th>
-                <th>관리</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for cat in categories %}
-            <tr>
-                <form action="/admin/category/edit/{{ cat.idx }}" method="post">
-                    <td>
-                        <input type="number" name="order_no" value="{{ cat.order_no }}" class="input-num" required>
-                    </td>
-                    <td>
-                        <input type="text" name="name" value="{{ cat.name }}" required>
-                    </td>
-                    <td>
-                        <button type="submit" class="btn-sm">수정 저장</button>
-                    </td>
-                </form>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h2>등록된 카테고리 목록</h2>
+    <div class="category-list">
+        {% for cat in categories %}
+        <div class="category-item">
+            <form action="/admin/category/edit/{{ cat.idx }}" method="post" style="display: flex; width: 100%; gap: 8px; align-items: center;">
+                <input type="number" name="order_no" value="{{ cat.order_no }}" class="input-order" required title="정렬 순서">
+                <input type="text" name="name" value="{{ cat.name }}" class="input-name" required title="카테고리명">
+                <button type="submit" class="btn-save">수정</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
 
     <script>
         window.addEventListener('beforeunload', function () {

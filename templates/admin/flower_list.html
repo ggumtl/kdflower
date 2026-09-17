@@ -2,118 +2,86 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>꽃 목록 및 관리</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>꽃 목록 및 관리 - 강동화훼</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        nav { margin-bottom: 20px; }
-        nav a { margin-right: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
-        .form-grid { display: grid; grid-template-columns: 120px 1fr; gap: 10px; max-width: 500px; margin-bottom: 30px; }
+        :root {
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --bg-color: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); padding: 15px; color: #333; }
+
+        /* 모바일 상단 네비게이션 */
+        nav { display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; padding-bottom: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; }
+        nav a { text-decoration: none; color: var(--primary-color); font-weight: bold; padding: 6px 12px; background: white; border-radius: 20px; border: 1px solid var(--border-color); font-size: 0.85rem; }
+
+        h2 { font-size: 1.15rem; margin-bottom: 12px; font-weight: 700; }
+
+        /* 폼 그리드 (모바일 1열, PC 2열) */
+        .form-grid { display: grid; grid-template-columns: 1fr; gap: 10px; background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px; }
+        @media (min-width: 600px) {
+            .form-grid { grid-template-columns: 120px 1fr; align-items: center; }
+        }
+        .form-grid label { font-weight: bold; font-size: 0.85rem; }
+        .form-grid input, .form-grid select { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.9rem; }
+
+        .btn-submit { width: 100%; padding: 10px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+
+        /* 카테고리 필터 버튼 바 */
+        .filter-bar { display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; margin-bottom: 15px; padding-bottom: 5px; }
+        .filter-btn { padding: 6px 12px; border: 1px solid var(--primary-color); background-color: white; color: var(--primary-color); border-radius: 20px; text-decoration: none; font-size: 0.8rem; font-weight: bold; }
+        .filter-btn.active { background-color: var(--primary-color); color: white; }
+
+        /* 모바일 카드 및 PC 테이블 반응형 */
+        .flower-cards-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        @media (min-width: 600px) {
+            .flower-cards-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 900px) {
+            .flower-cards-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .flower-item-card { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: flex; gap: 12px; align-items: center; position: relative; }
         
-        /* 카테고리 필터 버튼 영역 */
-        .filter-bar { margin: 15px 0; display: flex; gap: 8px; flex-wrap: wrap; }
-        .filter-btn { padding: 6px 14px; border: 1px solid #007bff; background-color: #fff; color: #007bff; border-radius: 20px; text-decoration: none; font-size: 0.9em; font-weight: bold; }
-        .filter-btn.active { background-color: #007bff; color: #fff; }
+        .img-container { position: relative; width: 75px; height: 75px; flex-shrink: 0; border-radius: 6px; overflow: hidden; background-color: #eee; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .no-img-box { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #888; }
 
-        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; vertical-align: middle; }
-        th { background-color: #f2f2f2; }
+        /* 오른쪽 하단 토글 버튼 */
+        .toggle-overlay { position: absolute; bottom: 2px; right: 2px; }
+        .btn-view-on { background-color: rgba(40, 167, 69, 0.9); color: white; border: none; padding: 3px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
+        .btn-view-off { background-color: rgba(108, 117, 125, 0.9); color: white; border: none; padding: 3px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
 
-        /* 이미지 + ON/OFF 토글 오버레이 스타일 */
-        .img-container {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            margin: 0 auto;
-            border-radius: 4px;
-            overflow: hidden;
-            background-color: #f8f9fa;
-        }
+        .item-info { flex: 1; min-width: 0; }
+        .item-title { font-size: 0.95rem; font-weight: bold; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .item-sub { font-size: 0.8rem; color: #666; margin-bottom: 4px; }
+        .item-price { font-size: 0.85rem; font-weight: bold; color: var(--primary-color); }
 
-        .img-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
+        .item-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+        .btn-edit { background-color: var(--success-color); color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
+        .btn-delete { background-color: var(--danger-color); color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
 
-        .no-img-box {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            color: #8e8e93;
-            background-color: #e9ecef;
-        }
-
-        /* 이미지 위에 얹어지는 토글 버튼 */
-        .toggle-overlay {
-            position: absolute;
-            bottom: 4px; /* 기존 top: 4px 에서 bottom: 4px 로 변경 */
-            right: 4px;
-        }
-
-        .btn-view-on {
-            background-color: rgba(40, 167, 69, 0.9);
-            color: white;
-            border: none;
-            padding: 3px 6px;
-            cursor: pointer;
-            border-radius: 3px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
-
-        .btn-view-off {
-            background-color: rgba(108, 117, 125, 0.9);
-            color: white;
-            border: none;
-            padding: 3px 6px;
-            cursor: pointer;
-            border-radius: 3px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
-
-        .btn-edit { background-color: #28a745; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
-        .btn-delete { background-color: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
-
-        /* 수정 모달 스타일 */
+        /* 수정 모달 (모바일 대응) */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: white; margin: 5% auto; padding: 20px; border-radius: 8px; width: 450px; }
-        .close { float: right; font-size: 24px; font-weight: bold; cursor: pointer; }
+        .modal-content { background-color: white; margin: 10% auto; padding: 15px; border-radius: 8px; width: 92%; max-width: 450px; }
+        .close { float: right; font-size: 22px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <!-- 템플릿 파일 하단 </body> 바로 위에 추가 -->
-    <script>
-        // 1. 페이지를 떠나거나(폼 제출 등) 스크롤할 때 현재 Y 스크롤 위치 저장
-        window.addEventListener('beforeunload', function () {
-            sessionStorage.setItem('scrollPosition', window.scrollY);
-        });
-
-        // 2. 페이지 로드가 완료되면 저장된 스크롤 위치로 이동
-        window.addEventListener('DOMContentLoaded', function () {
-            const savedPosition = sessionStorage.getItem('scrollPosition');
-            if (savedPosition !== null) {
-                window.scrollTo(0, parseInt(savedPosition, 10));
-                // 복원 후 저장값 삭제 (필요에 따라 유지 가능)
-                sessionStorage.removeItem('scrollPosition');
-            }
-        });
-    </script>
 
     <nav>
-        <a href="/admin/category">카테고리 관리</a> | 
-        <a href="/admin/flower">꽃 목록 관리</a> | 
-        <a href="/admin/gallery-view">갤러리 뷰</a> | 
+        <a href="/admin/category">카테고리 관리</a>
+        <a href="/admin/flower">꽃 목록 관리</a>
+        <a href="/admin/gallery-view">갤러리 뷰</a>
         <a href="/admin/logout">로그아웃</a>
     </nav>
 
-    <h2>꽃 정보 등록</h2>
+    <h2>꽃 정보 신규 등록</h2>
     <form action="/admin/flower" method="post" enctype="multipart/form-data">
         <div class="form-grid">
             <label>카테고리 (*필수)</label>
@@ -139,95 +107,78 @@
             <label>이미지 파일</label>
             <input type="file" name="file" accept="image/*">
         </div>
-        <button type="submit" style="padding: 8px 16px;">등록하기</button>
+        <button type="submit" class="btn-submit">등록하기</button>
     </form>
 
-    <hr>
+    <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border-color);">
 
-    <h2>등록된 꽃 목록 (이름순 정렬)</h2>
+    <h2>등록된 꽃 목록</h2>
 
-    <!-- 1. 카테고리 필터 버튼 바 -->
+    <!-- 카테고리 필터 버튼 -->
     <div class="filter-bar">
-        <a href="/admin/flower" class="filter-btn {% if not selected_category %}active{% endif %}">
-            전체 보기
-        </a>
+        <a href="/admin/flower" class="filter-btn {% if not selected_category %}active{% endif %}">전체 보기</a>
         {% for cat in categories %}
-        <a href="/admin/flower?category_id={{ cat.idx }}" 
-           class="filter-btn {% if selected_category == cat.idx %}active{% endif %}">
+        <a href="/admin/flower?category_id={{ cat.idx }}" class="filter-btn {% if selected_category == cat.idx %}active{% endif %}">
             {{ cat.name }}
         </a>
         {% endfor %}
     </div>
 
-    <!-- 2. 꽃 목록 테이블 (IDX 컬럼 제거 및 이미지 오버레이 토글 버튼 반영) -->
-    <table>
-        <thead>
-            <tr>
-                <th>이미지 (View 상태)</th>
-                <th>카테고리</th>
-                <th>이름</th>
-                <th>보조 이름</th>
-                <th>색상</th>
-                <th>가격</th>
-                <th>업데이트 일시</th>
-                <th>관리</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for flower in flowers %}
-            <tr>
-                <!-- 이미지 컬럼 + 우상단 View 상태 토글 오버레이 -->
-                <td>
-                    <div class="img-container">
-                        {% if flower.img_path %}
-                        <img src="/{{ flower.img_path }}" alt="{{ flower.name }}">
-                        {% else %}
-                        <div class="no-img-box">준비중</div>
-                        {% endif %}
+    <!-- 모바일 터치 최적화 카드 그리드 -->
+    <div class="flower-cards-grid">
+        {% for flower in flowers %}
+        <div class="flower-item-card">
+            <div class="img-container">
+                {% if flower.img_path %}
+                <img src="/{{ flower.img_path }}" alt="{{ flower.name }}">
+                {% else %}
+                <div class="no-img-box">준비중</div>
+                {% endif %}
 
-                        <!-- 현재 페이지 유지를 위한 redirect_to 전송 -->
-                        {% set current_url = '/admin/flower?category_id=' ~ selected_category if selected_category else '/admin/flower' %}
-                        <form action="/admin/flower/toggle-view/{{ flower.idx }}?redirect_to={{ current_url }}" method="post" class="toggle-overlay">
-                            {% if flower.view == 1 %}
-                            <button type="submit" class="btn-view-on" title="클릭 시 숨김 처리">ON</button>
-                            {% else %}
-                            <button type="submit" class="btn-view-off" title="클릭 시 노출 처리">OFF</button>
-                            {% endif %}
-                        </form>
-                    </div>
-                </td>
-                <td>{{ flower.category_rel.name if flower.category_rel else '-' }}</td>
-                <td><strong>{{ flower.name }}</strong></td>
-                <td>{{ flower.name2 or '-' }}</td>
-                <td>{{ flower.color or '-' }}</td>
-                <td>{{ "{:,}".format(flower.price) }}원</td>
-                <td>{{ flower.update_date.strftime('%Y-%m-%d %H:%M') if flower.update_date else '-' }}</td>
-                <td>
-                    <button class="btn-edit" onclick="openEditModal(
-                        '{{ flower.idx }}',
-                        '{{ flower.category or '' }}',
-                        '{{ flower.name }}',
-                        '{{ flower.name2 or '' }}',
-                        '{{ flower.color or '' }}',
-                        '{{ flower.price }}'
-                    )">수정</button>
+                {% set current_url = '/admin/flower?category_id=' ~ selected_category if selected_category else '/admin/flower' %}
+                <form action="/admin/flower/toggle-view/{{ flower.idx }}?redirect_to={{ current_url }}" method="post" class="toggle-overlay">
+                    {% if flower.view == 1 %}
+                    <button type="submit" class="btn-view-on">ON</button>
+                    {% else %}
+                    <button type="submit" class="btn-view-off">OFF</button>
+                    {% endif %}
+                </form>
+            </div>
 
-                    <form action="/admin/flower/delete/{{ flower.idx }}" method="post" style="display:inline;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
-                        <button type="submit" class="btn-delete">삭제</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            <div class="item-info">
+                <div class="item-title">{{ flower.name }}</div>
+                <div class="item-sub">
+                    [{{ flower.category_rel.name if flower.category_rel else '-' }}] 
+                    {% if flower.color %}/ {{ flower.color }}{% endif %}
+                </div>
+                <div class="item-price">{{ "{:,}".format(flower.price) }}원</div>
+            </div>
+
+            <div class="item-actions">
+                <button class="btn-edit" onclick="openEditModal(
+                    '{{ flower.idx }}',
+                    '{{ flower.category or '' }}',
+                    '{{ flower.name }}',
+                    '{{ flower.name2 or '' }}',
+                    '{{ flower.color or '' }}',
+                    '{{ flower.price }}'
+                )">수정</button>
+
+                <form action="/admin/flower/delete/{{ flower.idx }}" method="post" style="margin:0;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                    <button type="submit" class="btn-delete">삭제</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 
     <!-- 수정 모달 -->
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeEditModal()">&times;</span>
-            <h3>꽃 정보 수정</h3>
+            <h3 style="margin-bottom: 12px; font-size: 1.1rem;">꽃 정보 수정</h3>
             <form id="editForm" action="" method="post" enctype="multipart/form-data">
-                <div class="form-grid">
+                <div class="form-grid" style="padding:0; border:none;">
                     <label>카테고리 (*필수)</label>
                     <select id="edit_category" name="category_idx" required>
                         <option value="">카테고리 선택</option>
@@ -252,7 +203,7 @@
                     <input type="file" name="file" accept="image/*">
                 </div>
                 <br>
-                <button type="submit" style="padding: 8px 16px;">수정 저장</button>
+                <button type="submit" class="btn-submit" style="background-color: var(--success-color);">수정 저장</button>
             </form>
         </div>
     </div>
@@ -278,6 +229,19 @@
                 modal.style.display = 'none';
             }
         }
+
+        // 스크롤 위치 보존
+        window.addEventListener('beforeunload', function () {
+            sessionStorage.setItem('scrollPosition', window.scrollY);
+        });
+
+        window.addEventListener('DOMContentLoaded', function () {
+            const savedPosition = sessionStorage.getItem('scrollPosition');
+            if (savedPosition !== null) {
+                window.scrollTo(0, parseInt(savedPosition, 10));
+                sessionStorage.removeItem('scrollPosition');
+            }
+        });
     </script>
 </body>
 </html>
