@@ -10,13 +10,12 @@
             --bg-color: #f8f9fa;
             --border-color: #dee2e6;
             --text-color: #333333;
-            --sticky-height: 92px; /* JS가 실제 높이로 자동 갱신함 (fallback 값) */
+            --sticky-height: 92px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); padding: 15px; color: var(--text-color); padding-bottom: 40px; }
 
-        /* 헤더 + 카테고리 네비게이션을 하나의 sticky 그룹으로 묶음 */
         .sticky-header {
             position: sticky;
             top: 0;
@@ -26,7 +25,6 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        /* 상단 헤더 */
         header {
             padding: 14px 12px 10px;
             text-align: center;
@@ -36,7 +34,6 @@
         header h1 { font-size: 1.2rem; font-weight: 700; margin-bottom: 2px; }
         header p { font-size: 0.75rem; color: #666; }
 
-        /* 상단 카테고리 네비게이션 */
         nav.category-bar {
             background-color: #ffffff;
             padding: 8px 10px;
@@ -55,23 +52,23 @@
             background-color: #f2f2f7;
             color: var(--text-color);
             border: 1px solid var(--border-color);
-            padding: 6px 10px;
+            padding: 6px 12px;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             flex: 0 0 auto;
+            transition: all 0.2s ease;
         }
 
-        nav.category-bar button:active {
+        nav.category-bar button.active {
             background-color: var(--primary-color);
             color: #ffffff;
+            border-color: var(--primary-color);
         }
 
-        /* 카테고리 섹션 및 스크롤 여백 보정 */
         .category-section {
             margin-bottom: 25px;
-            /* sticky 헤더 실제 높이(JS로 계산)만큼 여백을 둬서 글자가 가려지지 않도록 함 */
             scroll-margin-top: calc(var(--sticky-height) + 10px);
         }
 
@@ -85,7 +82,6 @@
             border-radius: 0 4px 4px 0;
         }
 
-        /* 3열 그리드 */
         .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
         @media (min-width: 768px) { .gallery-grid { grid-template-columns: repeat(6, 1fr); gap: 10px; } }
         @media (min-width: 1200px) { .gallery-grid { grid-template-columns: repeat(10, 1fr); gap: 10px; } }
@@ -115,7 +111,15 @@
         .no-img { font-size: 0.75rem; color: #888; text-align: center; }
 
         .card-info { padding: 5px 4px; text-align: center; background-color: white; border-top: 1px solid #f1f3f5; }
-        .flower-name { font-size: 0.75rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        
+        .flower-name { 
+            font-size: 0.75rem; 
+            font-weight: bold; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            display: block; 
+        }
 
         .empty-text { color: #adb5bd; font-size: 0.8rem; padding: 10px; }
 
@@ -176,7 +180,7 @@
 
         <nav class="category-bar">
             {% for category in categories %}
-            <button onclick="scrollToCategory('cat-{{ category.idx }}')">
+            <button onclick="scrollToCategory('cat-{{ category.idx }}', this)">
                 {{ category.name }}
             </button>
             {% endfor %}
@@ -192,17 +196,21 @@
                 {% set visible_flowers = category.flowers | selectattr("view", "equalto", 1) | list %}
                 {% if visible_flowers %}
                     {% for flower in visible_flowers %}
-                    <div class="flower-card" onclick="openImageViewer('/{{ flower.img_path }}', '{{ flower.name }}')">
+                    
+                    <!-- 꽃 이름 + 보조 이름까지만 조립 (색상 제거) -->
+                    {% set display_title = flower.name ~ ((' ' ~ flower.name2) if flower.name2 else '') %}
+                    
+                    <div class="flower-card" onclick="openImageViewer('/{{ flower.img_path }}', '{{ display_title }}')">
                         <div class="img-wrapper">
                             {% if flower.img_path %}
-                            <img src="/{{ flower.img_path }}" alt="{{ flower.name }}" loading="lazy">
+                            <img src="/{{ flower.img_path }}" alt="{{ display_title }}" loading="lazy">
                             {% else %}
                             <div class="no-img">준비중</div>
                             {% endif %}
                         </div>
 
                         <div class="card-info">
-                            <span class="flower-name" title="{{ flower.name }}">{{ flower.name }}</span>
+                            <span class="flower-name" title="{{ display_title }}">{{ display_title }}</span>
                         </div>
                     </div>
                     {% endfor %}
@@ -223,9 +231,6 @@
     </div>
 
     <script>
-        // sticky-header의 실제 높이를 측정해서 CSS 변수로 반영.
-        // 폰트/카테고리 개수/화면 크기에 따라 헤더 높이가 달라져도
-        // 카테고리 바가 절대 가려지지 않도록 함.
         function updateStickyOffset() {
             const stickyEl = document.querySelector('.sticky-header');
             if (!stickyEl) return;
@@ -235,11 +240,16 @@
 
         window.addEventListener('load', updateStickyOffset);
         window.addEventListener('resize', updateStickyOffset);
-        // 폰트 로딩 등으로 높이가 늦게 바뀌는 경우까지 커버
         setTimeout(updateStickyOffset, 300);
 
-        function scrollToCategory(id) {
+        function scrollToCategory(id, btnEl) {
             updateStickyOffset();
+            
+            if (btnEl) {
+                document.querySelectorAll('nav.category-bar button').forEach(b => b.classList.remove('active'));
+                btnEl.classList.add('active');
+            }
+
             const element = document.getElementById(id);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth' });
@@ -257,6 +267,7 @@
 
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.querySelectorAll('nav.category-bar button').forEach(b => b.classList.remove('active'));
         }
 
         function openImageViewer(imgPath, name) {
