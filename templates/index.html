@@ -30,7 +30,7 @@
         header h1 { font-size: 1.2rem; font-weight: 700; margin-bottom: 2px; }
         header p { font-size: 0.75rem; color: #666; }
 
-        /* 상단 카테고리 네비게이션 (가로 스크롤) */
+        /* 상단 카테고리 네비게이션 */
         nav.category-bar {
             background-color: #ffffff;
             padding: 8px 10px;
@@ -66,8 +66,12 @@
             color: #ffffff;
         }
 
-        /* 카테고리 섹션 및 타이틀 (gallery_view 스타일) */
-        .category-section { margin-bottom: 25px; scroll-margin-top: 110px; }
+        /* 카테고리 섹션 및 스크롤 여백 보정 */
+        .category-section { 
+            margin-bottom: 25px; 
+            scroll-margin-top: 130px; /* 상단 고정 바에 글자가 가려지지 않도록 여백 확대 */
+        }
+        
         .category-title { 
             font-size: 1.05rem; 
             font-weight: bold; 
@@ -78,12 +82,11 @@
             border-radius: 0 4px 4px 0; 
         }
 
-        /* 모바일 3열, PC 6~10열 그리드 */
+        /* 3열 그리드 */
         .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
         @media (min-width: 768px) { .gallery-grid { grid-template-columns: repeat(6, 1fr); gap: 10px; } }
         @media (min-width: 1200px) { .gallery-grid { grid-template-columns: repeat(10, 1fr); gap: 10px; } }
 
-        /* 갤러리 카드 디자인 */
         .flower-card { 
             background: white; 
             border: 1px solid var(--border-color); 
@@ -113,7 +116,6 @@
 
         .empty-text { color: #adb5bd; font-size: 0.8rem; padding: 10px; }
 
-        /* 맨 위로 가기 Floating 버튼 */
         #scrollTopBtn {
             position: fixed;
             bottom: 20px;
@@ -134,7 +136,6 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
-        /* 전체화면 이미지 모달 */
         .image-modal {
             display: none;
             position: fixed;
@@ -208,10 +209,8 @@
         {% endfor %}
     </div>
 
-    <!-- 맨 위로 가기 버튼 -->
     <button id="scrollTopBtn" onclick="scrollToTop()" title="맨 위로 이동">▲</button>
 
-    <!-- 전체화면 이미지 모달 -->
     <div id="imageModal" class="image-modal" onclick="closeImageViewer()">
         <img id="modalImg" class="modal-img" src="" alt="">
         <div id="modalCaption" class="modal-caption"></div>
