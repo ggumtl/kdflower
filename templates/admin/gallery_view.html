@@ -1,0 +1,175 @@
+<!-- templates/admin/gallery_view.html 전체 코드 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 갤러리 뷰</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f8f9fa; }
+        nav { margin-bottom: 20px; }
+        nav a { margin-right: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+        
+        .category-section { margin-bottom: 35px; }
+        .category-title { 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            padding: 8px 12px; 
+            background-color: #e9ecef; 
+            border-left: 4px solid #007bff;
+            margin-bottom: 12px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
+        }
+
+        @media (min-width: 1200px) {
+            .gallery-grid {
+                grid-template-columns: repeat(10, 1fr);
+            }
+        }
+
+        .flower-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .img-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background-color: #f1f3f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .no-img {
+            font-size: 0.75rem;
+            color: #868e96;
+            text-align: center;
+        }
+
+        /* 오른쪽 하단 오버레이 토글 버튼 */
+        .toggle-overlay {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+        }
+
+        .btn-toggle {
+            border: none;
+            padding: 3px 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 3px;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .btn-on { background-color: rgba(40, 167, 69, 0.9); color: white; }
+        .btn-off { background-color: rgba(108, 117, 125, 0.9); color: white; }
+
+        .card-info {
+            padding: 6px;
+            text-align: center;
+            background-color: #ffffff;
+            border-top: 1px solid #f1f3f5;
+        }
+
+        .flower-name {
+            font-size: 0.8rem;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        .empty-text { color: #adb5bd; font-size: 0.85rem; padding: 10px; }
+    </style>
+</head>
+<body>
+    <!-- 템플릿 파일 하단 </body> 바로 위에 추가 -->
+    <script>
+        // 1. 페이지를 떠나거나(폼 제출 등) 스크롤할 때 현재 Y 스크롤 위치 저장
+        window.addEventListener('beforeunload', function () {
+            sessionStorage.setItem('scrollPosition', window.scrollY);
+        });
+
+        // 2. 페이지 로드가 완료되면 저장된 스크롤 위치로 이동
+        window.addEventListener('DOMContentLoaded', function () {
+            const savedPosition = sessionStorage.getItem('scrollPosition');
+            if (savedPosition !== null) {
+                window.scrollTo(0, parseInt(savedPosition, 10));
+                // 복원 후 저장값 삭제 (필요에 따라 유지 가능)
+                sessionStorage.removeItem('scrollPosition');
+            }
+        });
+    </script>
+
+    <nav>
+        <a href="/admin/category">카테고리 관리</a> | 
+        <a href="/admin/flower">꽃 목록 관리</a> | 
+        <a href="/admin/gallery-view">갤러리 뷰</a> | 
+        <a href="/admin/logout">로그아웃</a>
+    </nav>
+
+    <h2>갤러리 뷰 (노출 설정)</h2>
+    <p style="font-size: 0.85rem; color: #6c757d; margin-bottom: 20px;">
+        이미지 오른쪽 하단의 ON/OFF 버튼을 누르면 노출 상태가 변경됩니다.
+    </p>
+
+    {% for category in categories %}
+    <div class="category-section">
+        <div class="category-title">{{ category.name }}</div>
+        
+        <div class="gallery-grid">
+            {% if category.flowers %}
+                {% for flower in category.flowers %}
+                <div class="flower-card">
+                    <div class="img-wrapper">
+                        {% if flower.img_path %}
+                        <img src="/{{ flower.img_path }}" alt="{{ flower.name }}">
+                        {% else %}
+                        <div class="no-img">준비중</div>
+                        {% endif %}
+
+                        <!-- 오른쪽 하단 ON/OFF 토글 오버레이 -->
+                        <form action="/admin/flower/toggle-view/{{ flower.idx }}?redirect_to=/admin/gallery-view" method="post" class="toggle-overlay">
+                            {% if flower.view == 1 %}
+                            <button type="submit" class="btn-toggle btn-on">ON</button>
+                            {% else %}
+                            <button type="submit" class="btn-toggle btn-off">OFF</button>
+                            {% endif %}
+                        </form>
+                    </div>
+                    
+                    <div class="card-info">
+                        <span class="flower-name" title="{{ flower.name }}">{{ flower.name }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-text">등록된 꽃이 없습니다.</div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</body>
+</html>
