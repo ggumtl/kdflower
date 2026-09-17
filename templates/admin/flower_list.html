@@ -16,13 +16,11 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); padding: 15px; color: #333; }
 
-        /* 모바일 상단 네비게이션 */
         nav { display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; padding-bottom: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; }
         nav a { text-decoration: none; color: var(--primary-color); font-weight: bold; padding: 6px 12px; background: white; border-radius: 20px; border: 1px solid var(--border-color); font-size: 0.85rem; }
 
         h2 { font-size: 1.15rem; margin-bottom: 12px; font-weight: 700; }
 
-        /* 폼 그리드 (모바일 1열, PC 2열) */
         .form-grid { display: grid; grid-template-columns: 1fr; gap: 10px; background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px; }
         @media (min-width: 600px) {
             .form-grid { grid-template-columns: 120px 1fr; align-items: center; }
@@ -32,12 +30,10 @@
 
         .btn-submit { width: 100%; padding: 10px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
 
-        /* 카테고리 필터 버튼 바 */
         .filter-bar { display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; margin-bottom: 15px; padding-bottom: 5px; }
         .filter-btn { padding: 6px 12px; border: 1px solid var(--primary-color); background-color: white; color: var(--primary-color); border-radius: 20px; text-decoration: none; font-size: 0.8rem; font-weight: bold; }
         .filter-btn.active { background-color: var(--primary-color); color: white; }
 
-        /* 모바일 카드 및 PC 테이블 반응형 */
         .flower-cards-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         @media (min-width: 600px) {
             .flower-cards-grid { grid-template-columns: repeat(2, 1fr); }
@@ -52,7 +48,6 @@
         .img-container img { width: 100%; height: 100%; object-fit: cover; }
         .no-img-box { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #888; }
 
-        /* 오른쪽 하단 토글 버튼 */
         .toggle-overlay { position: absolute; bottom: 2px; right: 2px; }
         .btn-view-on { background-color: rgba(40, 167, 69, 0.9); color: white; border: none; padding: 3px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
         .btn-view-off { background-color: rgba(108, 117, 125, 0.9); color: white; border: none; padding: 3px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
@@ -66,7 +61,6 @@
         .btn-edit { background-color: var(--success-color); color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
         .btn-delete { background-color: var(--danger-color); color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
 
-        /* 수정 모달 (모바일 대응) */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
         .modal-content { background-color: white; margin: 10% auto; padding: 15px; border-radius: 8px; width: 92%; max-width: 450px; }
         .close { float: right; font-size: 22px; font-weight: bold; cursor: pointer; }
@@ -124,7 +118,7 @@
         {% endfor %}
     </div>
 
-    <!-- 모바일 터치 최적화 카드 그리드 -->
+    <!-- 카드 그리드 -->
     <div class="flower-cards-grid">
         {% for flower in flowers %}
         <div class="flower-item-card">
@@ -164,7 +158,7 @@
                     '{{ flower.price }}'
                 )">수정</button>
 
-                <form action="/admin/flower/delete/{{ flower.idx }}" method="post" style="margin:0;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                <form action="/admin/flower/delete/{{ flower.idx }}?redirect_to={{ current_url }}" method="post" style="margin:0;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
                     <button type="submit" class="btn-delete">삭제</button>
                 </form>
             </div>
@@ -209,8 +203,13 @@
     </div>
 
     <script>
+        // 현재 선택된 카테고리 정보
+        const currentCategory = "{{ selected_category or '' }}";
+        const redirectUrl = currentCategory ? ('/admin/flower?category_id=' + currentCategory) : '/admin/flower';
+
         function openEditModal(idx, category, name, name2, color, price) {
-            document.getElementById('editForm').action = '/admin/flower/edit/' + idx;
+            // 수정 저장 시 현재 카테고리 필터 유지하도록 redirect_to 추가
+            document.getElementById('editForm').action = '/admin/flower/edit/' + idx + '?redirect_to=' + encodeURIComponent(redirectUrl);
             document.getElementById('edit_category').value = category;
             document.getElementById('edit_name').value = name;
             document.getElementById('edit_name2').value = name2;
@@ -230,7 +229,6 @@
             }
         }
 
-        // 스크롤 위치 보존
         window.addEventListener('beforeunload', function () {
             sessionStorage.setItem('scrollPosition', window.scrollY);
         });

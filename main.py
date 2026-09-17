@@ -219,7 +219,6 @@ def gallery_view_page(request: Request, db: Session = Depends(get_db)):
     )
 
 
-# 5. 꽃 정보 수정 POST
 @app.post("/admin/flower/edit/{flower_id}")
 async def update_flower(
     flower_id: int,
@@ -230,6 +229,7 @@ async def update_flower(
     price: int = Form(0),
     category_idx: str = Form(...),
     file: UploadFile = File(None),
+    redirect_to: str = "/admin/flower",  # 리다이렉트 경로 파라미터 추가
     db: Session = Depends(get_db)
 ):
     if not request.session.get("is_admin"):
@@ -237,7 +237,7 @@ async def update_flower(
 
     flower = db.query(models.FlowerList).filter(models.FlowerList.idx == flower_id).first()
     if not flower:
-        return RedirectResponse(url="/admin/flower", status_code=303)
+        return RedirectResponse(url=redirect_to, status_code=303)
 
     flower.name = name
     flower.name2 = name2
@@ -271,8 +271,8 @@ async def update_flower(
         flower.img_path = save_rel_path.replace("\\", "/")
 
     db.commit()
-    return RedirectResponse(url="/admin/flower", status_code=303)
-
+    # 요청 받은 redirect_to 경로로 리다이렉트
+    return RedirectResponse(url=redirect_to, status_code=303)
 
 # 6. 꽃 삭제 POST
 @app.post("/admin/flower/delete/{flower_id}")
