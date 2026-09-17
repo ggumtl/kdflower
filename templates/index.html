@@ -10,21 +10,27 @@
             --bg-color: #f8f9fa;
             --border-color: #dee2e6;
             --text-color: #333333;
+            --sticky-height: 92px; /* JS가 실제 높이로 자동 갱신함 (fallback 값) */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); padding: 15px; color: var(--text-color); padding-bottom: 40px; }
 
-        /* 상단 헤더 */
-        header {
-            background-color: #ffffff;
-            padding: 14px 12px 10px;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
+        /* 헤더 + 카테고리 네비게이션을 하나의 sticky 그룹으로 묶음 */
+        .sticky-header {
             position: sticky;
             top: 0;
             z-index: 30;
+            background-color: #ffffff;
             margin: -15px -15px 15px -15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* 상단 헤더 */
+        header {
+            padding: 14px 12px 10px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
         }
 
         header h1 { font-size: 1.2rem; font-weight: 700; margin-bottom: 2px; }
@@ -39,13 +45,8 @@
             overflow-x: auto;
             white-space: nowrap;
             border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 53px;
-            z-index: 20;
-            margin: -15px -15px 15px -15px;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
         }
 
         nav.category-bar::-webkit-scrollbar { display: none; }
@@ -59,6 +60,7 @@
             font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
+            flex: 0 0 auto;
         }
 
         nav.category-bar button:active {
@@ -67,19 +69,20 @@
         }
 
         /* 카테고리 섹션 및 스크롤 여백 보정 */
-        .category-section { 
-            margin-bottom: 25px; 
-            scroll-margin-top: 130px; /* 상단 고정 바에 글자가 가려지지 않도록 여백 확대 */
+        .category-section {
+            margin-bottom: 25px;
+            /* sticky 헤더 실제 높이(JS로 계산)만큼 여백을 둬서 글자가 가려지지 않도록 함 */
+            scroll-margin-top: calc(var(--sticky-height) + 10px);
         }
-        
-        .category-title { 
-            font-size: 1.05rem; 
-            font-weight: bold; 
-            padding: 8px 10px; 
-            background-color: #e9ecef; 
-            border-left: 4px solid var(--primary-color); 
-            margin-bottom: 10px; 
-            border-radius: 0 4px 4px 0; 
+
+        .category-title {
+            font-size: 1.05rem;
+            font-weight: bold;
+            padding: 8px 10px;
+            background-color: #e9ecef;
+            border-left: 4px solid var(--primary-color);
+            margin-bottom: 10px;
+            border-radius: 0 4px 4px 0;
         }
 
         /* 3열 그리드 */
@@ -87,25 +90,25 @@
         @media (min-width: 768px) { .gallery-grid { grid-template-columns: repeat(6, 1fr); gap: 10px; } }
         @media (min-width: 1200px) { .gallery-grid { grid-template-columns: repeat(10, 1fr); gap: 10px; } }
 
-        .flower-card { 
-            background: white; 
-            border: 1px solid var(--border-color); 
-            border-radius: 6px; 
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column; 
+        .flower-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
             cursor: pointer;
         }
 
-        .img-wrapper { 
-            position: relative; 
-            width: 100%; 
-            aspect-ratio: 1 / 1; 
-            background-color: #eee; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            overflow: hidden; 
+        .img-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
 
         .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
@@ -165,18 +168,20 @@
 </head>
 <body>
 
-    <header>
-        <h1>강동화훼 Gallery</h1>
-        <p>카테고리를 선택하면 해당 위치로 이동합니다.</p>
-    </header>
+    <div class="sticky-header">
+        <header>
+            <h1>강동화훼 Gallery</h1>
+            <p>카테고리를 선택하면 해당 위치로 이동합니다.</p>
+        </header>
 
-    <nav class="category-bar">
-        {% for category in categories %}
-        <button onclick="scrollToCategory('cat-{{ category.idx }}')">
-            {{ category.name }}
-        </button>
-        {% endfor %}
-    </nav>
+        <nav class="category-bar">
+            {% for category in categories %}
+            <button onclick="scrollToCategory('cat-{{ category.idx }}')">
+                {{ category.name }}
+            </button>
+            {% endfor %}
+        </nav>
+    </div>
 
     <div class="container">
         {% for category in categories %}
@@ -195,7 +200,7 @@
                             <div class="no-img">준비중</div>
                             {% endif %}
                         </div>
-                        
+
                         <div class="card-info">
                             <span class="flower-name" title="{{ flower.name }}">{{ flower.name }}</span>
                         </div>
@@ -218,7 +223,23 @@
     </div>
 
     <script>
+        // sticky-header의 실제 높이를 측정해서 CSS 변수로 반영.
+        // 폰트/카테고리 개수/화면 크기에 따라 헤더 높이가 달라져도
+        // 카테고리 바가 절대 가려지지 않도록 함.
+        function updateStickyOffset() {
+            const stickyEl = document.querySelector('.sticky-header');
+            if (!stickyEl) return;
+            const height = stickyEl.offsetHeight;
+            document.documentElement.style.setProperty('--sticky-height', height + 'px');
+        }
+
+        window.addEventListener('load', updateStickyOffset);
+        window.addEventListener('resize', updateStickyOffset);
+        // 폰트 로딩 등으로 높이가 늦게 바뀌는 경우까지 커버
+        setTimeout(updateStickyOffset, 300);
+
         function scrollToCategory(id) {
+            updateStickyOffset();
             const element = document.getElementById(id);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth' });
@@ -240,7 +261,7 @@
 
         function openImageViewer(imgPath, name) {
             if (!imgPath || imgPath === '/None') return;
-            
+
             const modal = document.getElementById("imageModal");
             const modalImg = document.getElementById("modalImg");
             const modalCaption = document.getElementById("modalCaption");
