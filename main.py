@@ -3,6 +3,7 @@ import uuid
 from io import BytesIO
 from PIL import Image, ImageOps
 
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi import FastAPI, Depends, Request, Form, UploadFile, File
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -315,3 +316,22 @@ def toggle_flower_view(
         db.commit()
 
     return RedirectResponse(url=redirect_to, status_code=303)
+
+# DB 백업 파일 다운로드 라우트 추가
+@app.get("/admin/db-backup")
+def db_backup(request: Request):
+    if not request.session.get("is_admin"):
+        return RedirectResponse(url="/admin/login", status_code=303)
+
+    db_path = "flower.db"
+    
+    # DB 파일 존재 여부 확인 후 다운로드 응답
+    if os.path.exists(db_path):
+        return FileResponse(
+            path=db_path,
+            filename="flower_backup.db",
+            media_type="application/octet-stream"
+        )
+    else:
+        return RedirectResponse(url="/admin/flower", status_code=303)
+    
