@@ -10,12 +10,13 @@
             --bg-color: #f8f9fa;
             --border-color: #dee2e6;
             --text-color: #333333;
-            --sticky-height: 92px;
+            --sticky-height: 110px; /* JS가 실제 높이로 자동 갱신함 */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); padding: 15px; color: var(--text-color); padding-bottom: 40px; }
 
+        /* 헤더 + 카테고리 네비게이션을 하나의 sticky 그룹으로 묶음 */
         .sticky-header {
             position: sticky;
             top: 0;
@@ -25,7 +26,9 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
+        /* 상단 헤더 & 우측 상단 관리자 링크 */
         header {
+            position: relative;
             padding: 14px 12px 10px;
             text-align: center;
             border-bottom: 1px solid var(--border-color);
@@ -34,19 +37,33 @@
         header h1 { font-size: 1.2rem; font-weight: 700; margin-bottom: 2px; }
         header p { font-size: 0.75rem; color: #666; }
 
+        /* 우측 상단 관리자 링크 버튼 */
+        .admin-link {
+            position: absolute;
+            right: 12px;
+            top: 14px;
+            font-size: 0.75rem;
+            color: #666;
+            text-decoration: none;
+            font-weight: 600;
+            background-color: #f2f2f7;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+        .admin-link:active {
+            background-color: var(--border-color);
+        }
+
+        /* 상단 카테고리 네비게이션 (자동 줄바꿈 설정) */
         nav.category-bar {
             background-color: #ffffff;
             padding: 8px 10px;
             display: flex;
+            flex-wrap: wrap; /* 화면 영역을 넘어가면 줄바꿈 처리 */
             gap: 6px;
-            overflow-x: auto;
-            white-space: nowrap;
             border-bottom: 1px solid var(--border-color);
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
         }
-
-        nav.category-bar::-webkit-scrollbar { display: none; }
 
         nav.category-bar button {
             background-color: #f2f2f7;
@@ -67,6 +84,7 @@
             border-color: var(--primary-color);
         }
 
+        /* 카테고리 섹션 및 스크롤 여백 보정 */
         .category-section {
             margin-bottom: 25px;
             scroll-margin-top: calc(var(--sticky-height) + 10px);
@@ -82,6 +100,7 @@
             border-radius: 0 4px 4px 0;
         }
 
+        /* 3열 그리드 (모바일 3열, PC 6~10열) */
         .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
         @media (min-width: 768px) { .gallery-grid { grid-template-columns: repeat(6, 1fr); gap: 10px; } }
         @media (min-width: 1200px) { .gallery-grid { grid-template-columns: repeat(10, 1fr); gap: 10px; } }
@@ -176,6 +195,8 @@
         <header>
             <h1>강동화훼 Gallery</h1>
             <p>카테고리를 선택하면 해당 위치로 이동합니다.</p>
+            <!-- 우측 상단 관리자 페이지 링크 -->
+            <a href="/admin/flower" class="admin-link">관리자</a>
         </header>
 
         <nav class="category-bar">
@@ -197,7 +218,6 @@
                 {% if visible_flowers %}
                     {% for flower in visible_flowers %}
                     
-                    <!-- 꽃 이름 + 보조 이름까지만 조립 (색상 제거) -->
                     {% set display_title = flower.name ~ ((' ' ~ flower.name2) if flower.name2 else '') %}
                     
                     <div class="flower-card" onclick="openImageViewer('/{{ flower.img_path }}', '{{ display_title }}')">
@@ -231,6 +251,7 @@
     </div>
 
     <script>
+        // 카테고리가 여러 줄이 되면서 헤더 높이가 커져도 스크롤 오프셋을 동적으로 자동 계산
         function updateStickyOffset() {
             const stickyEl = document.querySelector('.sticky-header');
             if (!stickyEl) return;
