@@ -10,6 +10,7 @@
             --bg-color: #f8f9fa;
             --border-color: #dee2e6;
             --danger-color: #dc3545;
+            --secondary-color: #6c757d;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -65,7 +66,7 @@
             text-align: center;
         }
 
-        button { 
+        .btn-login { 
             width: 100%; 
             padding: 12px; 
             background-color: var(--primary-color); 
@@ -78,7 +79,27 @@
             margin-top: 5px;
         }
 
-        button:active { background-color: #0056b3; }
+        .btn-login:active { background-color: #0056b3; }
+
+        /* 홈 바로가기 버튼 스타일 */
+        .btn-home {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #ffffff;
+            color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-home:active {
+            background-color: #f1f3f5;
+        }
     </style>
 </head>
 <body>
@@ -96,8 +117,11 @@
                 <label for="password">비밀번호</label>
                 <input type="password" id="password" name="password" placeholder="비밀번호 입력" required>
             </div>
-            <button type="submit">로그인</button>
+            <button type="submit" class="btn-login">로그인</button>
         </form>
+
+        <!-- 홈 바로가기 버튼 -->
+        <a href="/" class="btn-home">메인 갤러리로 이동</a>
     </div>
 </body>
 </html>
