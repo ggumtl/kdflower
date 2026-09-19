@@ -9,6 +9,7 @@
             --primary-color: #007bff;
             --success-color: #28a745;
             --danger-color: #dc3545;
+            --secondary-color: #6c757d;
             --bg-color: #f8f9fa;
             --border-color: #dee2e6;
         }
@@ -61,9 +62,15 @@
         .btn-edit { background-color: var(--success-color); color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
         .btn-delete { background-color: var(--danger-color); color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
 
+        /* 수정 및 삭제 확인 모달 */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: white; margin: 10% auto; padding: 15px; border-radius: 8px; width: 92%; max-width: 450px; }
+        .modal-content { background-color: white; margin: 15% auto; padding: 20px; border-radius: 8px; width: 92%; max-width: 400px; text-align: center; }
         .close { float: right; font-size: 22px; font-weight: bold; cursor: pointer; }
+
+        /* 삭제 모달 전용 버튼 그룹 */
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .btn-modal-yes { flex: 1; padding: 10px; background-color: var(--danger-color); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-modal-no { flex: 1; padding: 10px; background-color: var(--secondary-color); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -76,7 +83,6 @@
         <a href="/admin/logout">로그아웃</a>
     </nav>
 
-    
     <h2>꽃 정보 신규 등록</h2>
     <form action="/admin/flower" method="post" enctype="multipart/form-data">
         <div class="form-grid">
@@ -160,9 +166,8 @@
                     '{{ flower.price }}'
                 )">수정</button>
 
-                <form action="/admin/flower/delete/{{ flower.idx }}?redirect_to={{ current_url }}" method="post" style="margin:0;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
-                    <button type="submit" class="btn-delete">삭제</button>
-                </form>
+                <!-- 삭제 클릭 시 커스텀 예/아니오 모달 호출 -->
+                <button type="button" class="btn-delete" onclick="confirmDelete('{{ flower.idx }}', '{{ flower.name }}')">삭제</button>
             </div>
         </div>
         {% endfor %}
@@ -170,7 +175,7 @@
 
     <!-- 수정 모달 -->
     <div id="editModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="text-align: left;">
             <span class="close" onclick="closeEditModal()">&times;</span>
             <h3 style="margin-bottom: 12px; font-size: 1.1rem;">꽃 정보 수정</h3>
             <form id="editForm" action="" method="post" enctype="multipart/form-data">
@@ -204,13 +209,27 @@
         </div>
     </div>
 
+    <!-- 삭제 확인 커스텀 모달 ('예' / '아니오' 선택) -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 10px; font-size: 1.1rem;">삭제 확인</h3>
+            <p id="deleteMessage" style="font-size: 0.95rem; color: #555;">정말 삭제하시겠습니까?</p>
+            
+            <form id="deleteForm" action="" method="post">
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-modal-yes">예 (Yes)</button>
+                    <button type="button" class="btn-modal-no" onclick="closeDeleteModal()">아니오 (No)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // 현재 선택된 카테고리 정보
         const currentCategory = "{{ selected_category or '' }}";
         const redirectUrl = currentCategory ? ('/admin/flower?category_id=' + currentCategory) : '/admin/flower';
 
+        // 수정 모달
         function openEditModal(idx, category, name, name2, color, price) {
-            // 수정 저장 시 현재 카테고리 필터 유지하도록 redirect_to 추가
             document.getElementById('editForm').action = '/admin/flower/edit/' + idx + '?redirect_to=' + encodeURIComponent(redirectUrl);
             document.getElementById('edit_category').value = category;
             document.getElementById('edit_name').value = name;
@@ -224,10 +243,28 @@
             document.getElementById('editModal').style.display = 'none';
         }
 
+        // 삭제 확인 모달
+        function confirmDelete(idx, flowerName) {
+            const deleteForm = document.getElementById('deleteForm');
+            const deleteMessage = document.getElementById('deleteMessage');
+            
+            deleteForm.action = '/admin/flower/delete/' + idx + '?redirect_to=' + encodeURIComponent(redirectUrl);
+            deleteMessage.innerText = `'${flowerName}' 항목을 삭제하시겠습니까?`;
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
         window.onclick = function(event) {
-            const modal = document.getElementById('editModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
+            const editModal = document.getElementById('editModal');
+            const deleteModal = document.getElementById('deleteModal');
+            if (event.target == editModal) {
+                editModal.style.display = 'none';
+            }
+            if (event.target == deleteModal) {
+                deleteModal.style.display = 'none';
             }
         }
 
